@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+
+// ==============================
+// CLIENTE
+// ==============================
+
+model Cliente {
+  idCliente Int @id @default(autoincrement())
+
+  nome      String  @db.VarChar(100)
+  email     String  @unique @db.VarChar(250)
+  senha     String  @db.VarChar(100)
+  telefone  String? @db.VarChar(20)
+
+  // Um cliente pode possuir vários carrinhos
+  carrinhos Carrinho[]
+
+  // Um cliente pode realizar vários pedidos
+  pedidos Pedido[]
+}
+
+
+// ==============================
+// ADMINISTRADOR
+// ==============================
+
+model Administrador {
+  idAdmin Int @id @default(autoincrement())
+
+  nome  String @db.VarChar(100)
+  senha String @db.VarChar(100)
+}
+
+
+// ==============================
+// DESIGNER
+// ==============================
+
+model Designer {
+  idDesigner Int @id @default(autoincrement())
+
+  nome  String @db.VarChar(100)
+  email String @unique @db.VarChar(250)
+  senha String @db.VarChar(100)
+
+  // Designer cadastra modelos
+  modelos Modelo[]
+
+  // Designer cadastra estampas
+  estampas Estampa[]
+}
+
+
+// ==============================
+// CARRINHO
+// ==============================
+
+model Carrinho {
+  idCarrinho Int @id @default(autoincrement())
+
+  dataCriacao DateTime @default(now())
+
+  // FK para Cliente
+  idCliente Int
+
+  cliente Cliente @relation(fields: [idCliente], references: [idCliente])
+
+  // Camisas que estão no carrinho
+  camisasPersonalizadas CamisaPersonalizada[]
+}
+
+
+// ==============================
+// PEDIDO
+// ==============================
+
+model Pedido {
+  idPedido Int @id @default(autoincrement())
+
+  dataPedido DateTime @default(now())
+
+  // FK para Cliente
+  idCliente Int
+
+  cliente Cliente @relation(fields: [idCliente],references: [idCliente])
+
+  // Camisas pertencentes ao pedido
+  camisasPersonalizadas CamisaPersonalizada[]
+}
+
+
+// ==============================
+// MODELO
+// ==============================
+
+model Modelo {
+  idModelo Int @id @default(autoincrement())
+
+  nome      String  @db.VarChar(100)
+  descricao String? @db.VarChar(500)
+
+  precoBase Decimal @db.Decimal(10, 2)
+
+  // Designer que cadastrou o modelo
+  idDesigner Int
+
+  designer Designer @relation(fields: [idDesigner],references: [idDesigner])
+
+  // Camisas personalizadas baseadas neste modelo
+  camisasPersonalizadas CamisaPersonalizada[]
+}
+
+
+// ==============================
+// ESTAMPA
+// ==============================
+
+model Estampa {
+  idEstampa Int @id @default(autoincrement())
+
+  nomeEstampa String @db.VarChar(100)
+
+  arquivoImagem Bytes
+
+  // Designer responsável pelo cadastro
+  idDesigner Int
+
+  designer Designer @relation(fields: [idDesigner],references: [idDesigner])
+
+  // Camisas que utilizam esta estampa
+  camisasPersonalizadas CamisaPersonalizada[]
+}
+
+
+// ==============================
+// CAMISA PERSONALIZADA
+// ==============================
+
+model CamisaPersonalizada {
+  idCamisa Int @id @default(autoincrement())
+
+  textoPersonalizado String? @db.VarChar(500)
+
+  imagemUpload Bytes?
+
+  preview Bytes?
+
+  // ==========================
+  // MODELO
+  // ==========================
+
+  idModelo Int
+
+  modelo Modelo @relation(fields: [idModelo],references: [idModelo])
+
+  // ==========================
+  // ESTAMPA
+  // ==========================
+
+  idEstampa Int?
+
+  estampa Estampa? @relation(fields: [idEstampa],references: [idEstampa])
+
+  // ==========================
+  // CARRINHO
+  // ==========================
+
+  idCarrinho Int?
+
+  carrinho Carrinho? @relation(fields: [idCarrinho],references: [idCarrinho])
+
+  // ==========================
+  // PEDIDO
+  // ==========================
+
+  idPedido Int?
+
+  pedido Pedido? @relation(fields: [idPedido],references: [idPedido])
+}
